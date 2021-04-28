@@ -1,0 +1,6 @@
+module Pods_AlicesPlayground {
+  umbrella header "Pods-AlicesPlayground-umbrella.h"
+
+  export *
+  module * { export * }
+}

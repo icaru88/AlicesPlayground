@@ -1,0 +1,14 @@
+com/alicesplayground/ReactNativeFlipper.java
+ com.alicesplayground.ReactNativeFlipper
+ com.alicesplayground.ReactNativeFlipper$1
+ com.alicesplayground.ReactNativeFlipper$2
+ com.alicesplayground.ReactNativeFlipper$2$1
+com/alicesplayground/BuildConfig.java
+ com.alicesplayground.BuildConfig
+com/alicesplayground/MainApplication.java
+ com.alicesplayground.MainApplication
+ com.alicesplayground.MainApplication$1
+com/alicesplayground/MainActivity.java
+ com.alicesplayground.MainActivity
+com/facebook/react/PackageList.java
+ com.facebook.react.PackageList
