@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from "react";
 import {
   Platform,
   SafeAreaView,
@@ -11,12 +11,12 @@ import {
   Dimensions,
   Image,
   Animated,
-} from 'react-native';
-import ActionSheet from 'react-native-actions-sheet';
+} from "react-native";
+import ActionSheet from "react-native-actions-sheet";
 
-const windowHeight = Dimensions.get('window').height;
+const windowHeight = Dimensions.get("window").height;
 const HEADER_MAX_HEIGHT = windowHeight;
-const HEADER_MIN_HEIGHT = Platform.OS === 'ios' ? 60 : 73;
+const HEADER_MIN_HEIGHT = Platform.OS === "ios" ? 60 : 73;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 const ActionSheetModal = () => {
@@ -26,22 +26,17 @@ const ActionSheetModal = () => {
   const [scrollY, setScrollY] = useState(
     new Animated.Value(
       // iOS has negative initial scroll value because content inset...
-      Platform.OS === 'ios' ? -HEADER_MAX_HEIGHT : 0,
-    ),
+      Platform.OS === "ios" ? -HEADER_MAX_HEIGHT : 0
+    )
   );
-  const [isBottom, setIsBottom] = useState(false);
 
   useEffect(() => {
     actionSheetRef.current?.show();
-    // addHasReachedTopListener(onHasReachedTop);
-    // return () => {
-    //   removeHasReachedTopListener(onHasReachedTop);
-    // };
   }, []);
 
   function changeScrollEnabled(parent, child) {
     // We only need this on Android, iOS works great with Child Scroll Views.
-    if (Platform.OS !== 'android') {
+    if (Platform.OS !== "android") {
       return;
     }
     actionSheetScrollRef?.current?.setNativeProps({
@@ -56,12 +51,12 @@ const ActionSheetModal = () => {
   const onScroll = () => {
     changeScrollEnabled(false, true);
 
-    Animated.event([{nativeEvent: {contentOffset: {y: scrollY}}}], {
+    Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
       useNativeDriver: true,
     });
   };
 
-  const onHasReachedTop = hasReachedTop => {
+  const onHasReachedTop = (hasReachedTop) => {
     changeScrollEnabled(!hasReachedTop, hasReachedTop);
   };
 
@@ -69,7 +64,7 @@ const ActionSheetModal = () => {
     scrollViewRef.current?.setNativeProps({
       scrollEnabled: false,
     });
-    console.log('onClose');
+    console.log("onClose");
   };
 
   const onOpen = () => {
@@ -80,7 +75,7 @@ const ActionSheetModal = () => {
 
   const currentScrollY = Animated.add(
     scrollY,
-    Platform.OS === 'ios' ? HEADER_MAX_HEIGHT : 0,
+    Platform.OS === "ios" ? HEADER_MAX_HEIGHT : 0
   );
   // const headerTranslate = currentScrollY.interpolate({
   //   inputRange: [0, HEADER_SCROLL_DISTANCE],
@@ -91,15 +86,13 @@ const ActionSheetModal = () => {
   const imageOpacity = currentScrollY.interpolate({
     inputRange: [0, HEADER_SCROLL_DISTANCE / 2, HEADER_SCROLL_DISTANCE],
     outputRange: [1, 1, 0],
-    extrapolate: 'clamp',
+    extrapolate: "clamp",
   });
   const imageTranslate = currentScrollY.interpolate({
     inputRange: [0, HEADER_SCROLL_DISTANCE],
     outputRange: [0, 100],
-    extrapolate: 'clamp',
+    extrapolate: "clamp",
   });
-
-  console.log(imageTranslate);
 
   return (
     <>
@@ -109,43 +102,52 @@ const ActionSheetModal = () => {
             styles.backgroundImage,
             {
               opacity: imageOpacity,
-              transform: [{translateY: imageTranslate}],
+              transform: [{ translateY: imageTranslate }],
               height: windowHeight * 0.4,
             },
           ]}
-          source={require('../../assets/cat.jpg')}
+          source={require("../../assets/cat.jpg")}
         />
         <ActionSheet
-          containerStyle={{borderRadius: 32}}
+          containerStyle={{ borderRadius: 32 }}
           animated={false}
           initialOffsetFromBottom={0.7}
           ref={actionSheetRef}
           onOpen={onOpen}
           statusBarTranslucent
           onPositionChanged={onHasReachedTop}
-          // bounceOnOpen={true}
-          // bounciness={0}
+          bounceOnOpen={true}
+          bounciness={0}
           gestureEnabled={true}
           onClose={onClose}
           //closeOnTouchBackdrop={false}
           closable={false}
-          bottomOffset={400}
+          bottomOffset={200}
           closeOnPressBack={false}
           CustomHeaderComponent={
             <TouchableOpacity
               onPress={() => {
-                console.log('header is clicked');
-                actionSheetRef.current?.snapToOffset(200);
+                const { currentOffsetFromBottom } = actionSheetRef.current;
+                if (currentOffsetFromBottom > 0.9) {
+                  actionSheetRef.current?.snapToOffset(windowHeight * 0.7);
+                } else if (currentOffsetFromBottom >= 0.7) {
+                  actionSheetRef.current?.snapToOffset(200);
+                } else {
+                  actionSheetRef.current?.snapToOffset(windowHeight);
+                }
               }}
-              style={{padding: 15}}>
+              style={{ padding: 15 }}
+            >
               <View style={styles.indicator} />
             </TouchableOpacity>
           }
-          defaultOverlayOpacity={0}>
+          defaultOverlayOpacity={0}
+        >
           <View
             style={{
               paddingHorizontal: 12,
-            }}>
+            }}
+          >
             <Animated.ScrollView
               ref={scrollViewRef}
               //nestedScrollEnabled={false}
@@ -155,37 +157,24 @@ const ActionSheetModal = () => {
                 changeScrollEnabled(false, true);
                 return false;
               }}
-              onScrollEndDrag={({nativeEvent}) => {
+              onScrollEndDrag={({ nativeEvent }) => {
                 changeScrollEnabled(true, false);
                 actionSheetRef.current?.handleChildScrollEnd();
-                // snap to this location on screen
-                //  actionSheetRef.current?.snapToOffset(200);
-                // const {y} = nativeEvent.contentOffset;
-                // console.log(y);
-
-                // if (y < -windowHeight + 20) {
-                //   actionSheetRef.current?.snapToOffset(-windowHeight + 20);
-                // }
               }}
               onTouchEnd={() => {
                 changeScrollEnabled(true, false);
-                // snap to this location on screen
-                // actionSheetRef.current?.snapToOffset(200);
               }}
               onScrollAnimationEnd={() => {
                 changeScrollEnabled(true, false);
                 actionSheetRef.current?.handleChildScrollEnd();
-                // snap to this location on screen
-                // actionSheetRef.current?.snapToOffset(200);
               }}
               onMomentumScrollEnd={() => {
                 changeScrollEnabled(true, false);
                 actionSheetRef.current?.handleChildScrollEnd();
-                // snap to this location on screen
-                // actionSheetRef.current?.snapToOffset(200);
               }}
               scrollEventThrottle={2}
-              style={styles.scrollview}>
+              style={styles.scrollview}
+            >
               <TextInput
                 style={styles.input}
                 multiline={true}
@@ -193,18 +182,13 @@ const ActionSheetModal = () => {
               />
 
               <View>
-                {items.map(item => (
-                  <TouchableOpacity
-                    key={item}
-                    // onPress={() => {
-                    //   actionSheetRef.current?.hide();
-                    // }}
-                    style={styles.listItem}>
+                {items.map((item) => (
+                  <TouchableOpacity key={item} style={styles.listItem}>
                     <View
                       style={{
                         width: item,
                         height: 15,
-                        backgroundColor: '#f0f0f0',
+                        backgroundColor: "#f0f0f0",
                         marginVertical: 15,
                         borderRadius: 5,
                       }}
@@ -261,72 +245,72 @@ const styles = StyleSheet.create({
     height: 100,
   },
   listItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   btnLeft: {
     width: 30,
     height: 30,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
     borderRadius: 100,
   },
   input: {
-    width: '100%',
+    width: "100%",
     minHeight: 50,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: "#f0f0f0",
     marginBottom: 15,
     paddingHorizontal: 10,
   },
   container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 15,
   },
   scrollview: {
-    width: '100%',
+    width: "100%",
     padding: 12,
   },
   btn: {
     height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    backgroundColor: '#fe8a71',
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: "#fe8a71",
     paddingHorizontal: 10,
     borderRadius: 5,
     elevation: 5,
-    shadowColor: 'black',
-    shadowOffset: {width: 0.3 * 4, height: 0.5 * 4},
+    shadowColor: "black",
+    shadowOffset: { width: 0.3 * 4, height: 0.5 * 4 },
     shadowOpacity: 0.2,
     shadowRadius: 0.7 * 4,
   },
   safeareview: {
-    justifyContent: 'center',
+    justifyContent: "center",
     flex: 1,
-    backgroundColor: 'pink',
+    backgroundColor: "pink",
   },
   btnTitle: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
   indicator: {
     height: 6,
     width: 60,
     borderRadius: 100,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
     marginVertical: 5,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   backgroundImage: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     width: null,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
 });
